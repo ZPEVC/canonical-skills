@@ -9,10 +9,10 @@ Every agent client stores skills in its own directory:
 | Agent | Skills path |
 |---|---|
 | Claude Code | `~/.claude/skills/` |
-| Gemini CLI | `~/.agents/skills/` |
-| VS Code Copilot | `.github/skills/` |
+| Gemini CLI / Antigravity | `~/.agents/skills/` |
+| VS Code Copilot | `~/.copilot/skills/` |
 
-Without a canonical source, you end up copying the same `SKILL.md` files everywhere, they drift out of sync, and deleting one vendor's config folder takes your skills with it.
+Without a canonical source, you end up copying the same `SKILL.md` files everywhere. They drift out of sync, and deleting one vendor's config folder takes your skills with it.
 
 ## The solution
 
@@ -25,6 +25,7 @@ Store your skills once in a version-controlled repo. Use symlinks to wire each a
 
 ~/.claude/skills/my-skill     → ~/your-repo/skills/my-skill   (symlink)
 ~/.agents/skills/my-skill     → ~/your-repo/skills/my-skill   (symlink)
+~/.copilot/skills/my-skill    → ~/your-repo/skills/my-skill   (symlink)
 ```
 
 Edit a skill once. Every agent sees the update immediately.
@@ -34,10 +35,10 @@ Edit a skill once. Every agent sees the update immediately.
 ### 1. Install the bootstrap skill
 
 ```bash
-npx skills install ZPEVC/canonical-skills
+npx skills add -g ZPEVC/canonical-skills
 ```
 
-### 2. Set up your canonical directory
+### 2. Create your canonical directory
 
 ```bash
 mkdir -p ~/your-repo/skills
@@ -49,7 +50,7 @@ mkdir -p ~/your-repo/skills
 bash ~/.claude/skills/canonical-skills-setup/scripts/bootstrap.sh ~/your-repo/skills
 ```
 
-The script creates symlinks from each agent's discovery directory to your canonical source. It's idempotent — safe to re-run any time, and on every new machine.
+The script creates symlinks from each agent’s discovery directory to your canonical source. It’s idempotent — safe to re-run any time, including on every new machine.
 
 ### 4. Add a new skill
 
@@ -59,7 +60,7 @@ mkdir -p ~/your-repo/skills/my-skill
 bash ~/.claude/skills/canonical-skills-setup/scripts/bootstrap.sh ~/your-repo/skills
 ```
 
-## What's in this repo
+## What’s in this repo
 
 ```
 skills/
@@ -72,3 +73,7 @@ skills/
 ## Built on
 
 - [agentskills.io](https://agentskills.io) — the open Agent Skills standard
+
+## License
+
+MIT

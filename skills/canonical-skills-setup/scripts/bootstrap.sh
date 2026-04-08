@@ -1,16 +1,23 @@
 #!/usr/bin/env bash
 # bootstrap.sh — Wire canonical skills to all local agent clients via symlinks.
-# Usage: bash bootstrap.sh [canonical-path]
-# Default canonical path: ~/Projects/knowledge-base/skills
+# Usage: bash bootstrap.sh <canonical-path>
+# Example: bash bootstrap.sh ~/Projects/my-repo/skills
 
 set -e
 
-CANONICAL="${1:-$HOME/Projects/knowledge-base/skills}"
-CANONICAL="$(eval echo "$CANONICAL")"  # expand ~ if passed as string
+# Require canonical path argument
+if [ -z "$1" ]; then
+  echo "Usage: bash bootstrap.sh <canonical-path>"
+  echo ""
+  echo "  <canonical-path>  Path to your canonical skills directory"
+  echo "                    e.g. ~/Projects/my-repo/skills"
+  exit 1
+fi
+
+CANONICAL="$(eval echo "$1")"  # expand ~ if passed as string
 
 if [ ! -d "$CANONICAL" ]; then
-  echo "❌ Canonical path not found: $CANONICAL"
-  echo "   Usage: bash bootstrap.sh [canonical-path]"
+  echo "❌ Directory not found: $CANONICAL"
   exit 1
 fi
 
@@ -21,6 +28,7 @@ echo ""
 AGENTS=(
   "Claude Code:$HOME/.claude/skills"
   "Gemini CLI / Antigravity:$HOME/.agents/skills"
+  "VS Code Copilot:$HOME/.copilot/skills"
 )
 
 linked=0
