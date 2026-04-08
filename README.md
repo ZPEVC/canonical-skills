@@ -1,63 +1,47 @@
 # canonical-skills
 
-A vendor-agnostic pattern for managing [Agent Skills](https://agentskills.io) across multiple AI agent clients without duplication or vendor lock-in.
+A one-time migration tool that consolidates scattered agent skills into a single GitHub repo, then hands off to [`npx skills`](https://www.npmjs.com/package/skills) for ongoing management.
 
 ## The problem
 
-Every agent client stores skills in its own directory:
+If you use multiple AI agents (Claude Code, Gemini CLI, VS Code Copilot, etc.), your skills end up scattered:
 
-| Agent | Skills path |
-|---|---|
-| Claude Code | `~/.claude/skills/` |
-| Gemini CLI / Antigravity | `~/.agents/skills/` |
-| VS Code Copilot | `~/.copilot/skills/` |
+```
+~/.claude/skills/my-skill/SKILL.md        ← copy 1
+~/.agents/skills/my-skill/SKILL.md        ← copy 2
+~/.gemini/antigravity/skills/my-skill/    ← copy 3
+```
 
-Without a canonical source, you end up copying the same `SKILL.md` files everywhere. They drift out of sync, and deleting one vendor's config folder takes your skills with it.
+They drift out of sync. You forget which version is current. Switching machines means starting over.
 
 ## The solution
 
-Store your skills once in a version-controlled repo. Use symlinks to wire each agent client to that single source.
+Run `/canonical-skills-setup` once. It will:
 
-```
-~/your-repo/skills/           ← canonical source (version controlled)
-    my-skill/
-        SKILL.md
+1. **Scan** all agent directories for existing skills
+2. **Separate** user-created skills from npx-managed ones
+3. **Help you create** a GitHub repo (or use an existing one)
+4. **Consolidate** your skills into that repo
+5. **Install globally** via `npx skills add -g your-org/your-repo --all`
+6. **Clean up** the old scattered copies
 
-~/.claude/skills/my-skill     → ~/your-repo/skills/my-skill   (symlink)
-~/.agents/skills/my-skill     → ~/your-repo/skills/my-skill   (symlink)
-~/.copilot/skills/my-skill    → ~/your-repo/skills/my-skill   (symlink)
-```
-
-Edit a skill once. Every agent sees the update immediately.
+After that, `npx skills` handles everything — updates, installs on new machines, distribution.
 
 ## Quick start
 
-### 1. Install the bootstrap skill
-
 ```bash
+# Install the migration skill
 npx skills add -g ZPEVC/canonical-skills
+
+# Run it in any agent that supports skills
+/canonical-skills-setup
 ```
 
-### 2. Create your canonical directory
+Or run the scanner directly:
 
 ```bash
-mkdir -p ~/your-repo/skills
-```
-
-### 3. Run the bootstrap
-
-```bash
-bash ~/.claude/skills/canonical-skills-setup/scripts/bootstrap.sh ~/your-repo/skills
-```
-
-The script creates symlinks from each agent’s discovery directory to your canonical source. It’s idempotent — safe to re-run any time, including on every new machine.
-
-### 4. Add a new skill
-
-```bash
-mkdir -p ~/your-repo/skills/my-skill
-# create ~/your-repo/skills/my-skill/SKILL.md
-bash ~/.claude/skills/canonical-skills-setup/scripts/bootstrap.sh ~/your-repo/skills
+# See what you've got scattered around
+bash ~/.claude/skills/canonical-skills-setup/scripts/migrate.sh scan
 ```
 
 ## What’s in this repo
@@ -65,9 +49,19 @@ bash ~/.claude/skills/canonical-skills-setup/scripts/bootstrap.sh ~/your-repo/sk
 ```
 skills/
   canonical-skills-setup/
-    SKILL.md              ← the /canonical-skills-setup slash command
+    SKILL.md              ← the /canonical-skills-setup onboarding flow
     scripts/
-      bootstrap.sh        ← symlink wiring script
+      migrate.sh          ← scanner and collector script
+```
+
+## After migration
+
+Once your skills are consolidated, you don't need this tool anymore. Use `npx skills` for everything:
+
+```bash
+npx skills list                              # see installed skills
+npx skills update                            # pull latest from your repo
+npx skills add -g your-org/your-repo --all   # reinstall on a new machine
 ```
 
 ## Built on
